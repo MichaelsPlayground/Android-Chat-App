@@ -256,3 +256,6 @@ So go to your Firebase console, click on the settings symbol right to "Projectue
 
 Scroll down to "Meine Apps" (="my apps") and download the google-services.json file again and don't forget to place
 the file in the app folder again as well.
+
+Now the app is ready to build and deploy but keep in mind: for using a release version you need 
+another SHA-1 hash !
