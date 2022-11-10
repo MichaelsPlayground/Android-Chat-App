@@ -11,6 +11,13 @@ Original source: https://github.com/Raj-m01/Android-Chat-App
 
 Please note that you need to append your own google-services.json file to run the app.
 
+There are 3 Firebase services necessary to run the app:
+
+-Authentication
+-Realtime Database
+-Storage
+
+
 ## Screenshots : 
 
 <table>
