@@ -1,5 +1,6 @@
 package com.example.chatapp;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
@@ -32,69 +33,57 @@ public class SettingActivity extends AppCompatActivity {
         myAuth = FirebaseAuth.getInstance();
         firebaseDatabase = FirebaseDatabase.getInstance();
 
-
         activitySettingBinding.backBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
                 FragmentManager fm = getSupportFragmentManager();
-                if(fm.getBackStackEntryCount()>0) {
+                if (fm.getBackStackEntryCount() > 0) {
                     fm.popBackStack();
                     activitySettingBinding.profile.setVisibility(View.VISIBLE);
                     activitySettingBinding.logout.setVisibility(View.VISIBLE);
-                }else {
+                } else {
                     Intent i = new Intent(SettingActivity.this, MainActivity.class);
                     startActivity(i);
                 }
             }
         });
 
-
         activitySettingBinding.profile.setOnClickListener(new View.OnClickListener() {
+            @SuppressLint("SuspiciousIndentation")
             @Override
             public void onClick(View v) {
-
                 activitySettingBinding.profile.setVisibility(View.GONE);
                 activitySettingBinding.logout.setVisibility(View.GONE);
 
                 fragmentTransaction = fragmentManager.beginTransaction();
-                        fragmentTransaction.replace(R.id.setting_container,ProfileFragment.class,null)
-                                .addToBackStack(null)
-                                .commit();
-
-
+                fragmentTransaction.replace(R.id.setting_container, ProfileFragment.class, null)
+                        .addToBackStack(null)
+                        .commit();
             }
         });
 
         activitySettingBinding.logout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
                 firebaseDatabase.getReference("Users").child(myAuth.getUid())
                         .child("token").setValue("");
                 myAuth.signOut();
                 Intent intent = new Intent(SettingActivity.this, SignupActivity.class);
                 startActivity(intent);
-
             }
         });
-
-
-
     }
 
     @Override
     public void onBackPressed() {
-
         FragmentManager fm = getSupportFragmentManager();
-        if(fm.getBackStackEntryCount()>0) {
+        if (fm.getBackStackEntryCount() > 0) {
             fm.popBackStack();
             activitySettingBinding.profile.setVisibility(View.VISIBLE);
             activitySettingBinding.logout.setVisibility(View.VISIBLE);
-        }
-        else
+        } else
             super.onBackPressed();
-
 //
     }
 }

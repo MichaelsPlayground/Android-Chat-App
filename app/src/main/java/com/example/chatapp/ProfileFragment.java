@@ -29,28 +29,24 @@ import com.squareup.picasso.Picasso;
 import com.theartofdev.edmodo.cropper.CropImage;
 import com.theartofdev.edmodo.cropper.CropImageView;
 
+import java.util.Objects;
 
 public class ProfileFragment extends Fragment {
 
-   FirebaseAuth firebaseAuth;
-   FirebaseDatabase firebaseDatabase;
-   FragmentProfileBinding binding;
-   FragmentManager fragmentManager;
-   FirebaseStorage firebaseStorage;
+    FirebaseAuth firebaseAuth;
+    FirebaseDatabase firebaseDatabase;
+    FragmentProfileBinding binding;
+    FragmentManager fragmentManager;
+    FirebaseStorage firebaseStorage;
 
     public ProfileFragment() {
         // Required empty public constructor
     }
 
-
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
     }
-
-
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -63,8 +59,6 @@ public class ProfileFragment extends Fragment {
         firebaseStorage = FirebaseStorage.getInstance();
         firebaseAuth = FirebaseAuth.getInstance();
 
-
-
         String uid = firebaseAuth.getUid();
 
         binding.uid.setText(uid);
@@ -72,11 +66,9 @@ public class ProfileFragment extends Fragment {
         binding.username.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
                 binding.editFragContainer.setVisibility(View.VISIBLE);
                 binding.editFragContainer.bringToFront();
                 binding.uid.setVisibility(View.GONE);
-
                 binding.text.setText("Enter new name");
 
                 binding.edittext.requestFocus();
@@ -85,10 +77,8 @@ public class ProfileFragment extends Fragment {
                     public void onClick(View v) {
                         String ss = binding.edittext.getText().toString().trim();
 
-
-
-
-                        firebaseDatabase.getReference("Users").child(firebaseAuth.getUid()).child("userName").setValue(ss).addOnSuccessListener(new OnSuccessListener<Void>() {
+                        firebaseDatabase.getReference("Users").child(Objects.requireNonNull(firebaseAuth.getUid())).child("userName").setValue(ss).addOnSuccessListener(new OnSuccessListener<Void>() {
+                            //firebaseDatabase.getReference("Users").child(firebaseAuth.getUid()).child("userName").setValue(ss).addOnSuccessListener(new OnSuccessListener<Void>() {
                             @Override
                             public void onSuccess(Void unused) {
 
@@ -97,12 +87,8 @@ public class ProfileFragment extends Fragment {
                                 binding.editFragContainer.setVisibility(View.GONE);
                             }
                         });
-
-
-
                     }
                 });
-
             }
         });
 
@@ -113,107 +99,96 @@ public class ProfileFragment extends Fragment {
                 binding.editFragContainer.setVisibility(View.VISIBLE);
                 binding.editFragContainer.bringToFront();
                 binding.uid.setVisibility(View.GONE);
-
-
                 binding.text.setText("Enter about");
                 binding.edittext.setHint("about");
-
                 binding.edittext.requestFocus();
                 binding.saveEditBtn.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         String ss = binding.edittext.getText().toString().trim();
 
-                        firebaseDatabase.getReference("Users").child(firebaseAuth.getUid()).child("about").setValue(ss);
+                        firebaseDatabase.getReference("Users").child(Objects.requireNonNull(firebaseAuth.getUid())).child("about").setValue(ss);
+                        //firebaseDatabase.getReference("Users").child(firebaseAuth.getUid()).child("about").setValue(ss);
                         binding.edittext.setText("");
                         binding.editFragContainer.setVisibility(View.GONE);
-
                     }
                 });
-
             }
         });
-        
-
-
 
         binding.newPic.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-                 CropImage.activity()
-                         .setAspectRatio(3,3)
-                         .setGuidelines(CropImageView.Guidelines.ON)
-                         .setFixAspectRatio(true).setOutputCompressQuality(60)
-                        .start(getContext(),ProfileFragment.this);
-
-
+                CropImage.activity()
+                        .setAspectRatio(3, 3)
+                        .setGuidelines(CropImageView.Guidelines.ON)
+                        .setFixAspectRatio(true).setOutputCompressQuality(60)
+                        .start(requireContext(), ProfileFragment.this);
+                //.start(getContext(),ProfileFragment.this);
             }
         });
 
+        assert uid != null;
+        firebaseDatabase.getReference("Users").child(uid).addValueEventListener(new ValueEventListener() {
+            //firebaseDatabase.getReference("Users").child(uid).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
 
-
-
-                firebaseDatabase.getReference("Users").child(uid).addValueEventListener(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-
+                // todo check for null object reference
+                String uName = Objects.requireNonNull(snapshot.child("userName").getValue()).toString();
+                String uMail = Objects.requireNonNull(snapshot.child("userMail").getValue()).toString();
+                String uPic = Objects.requireNonNull(snapshot.child("profilePic").getValue()).toString();
+                String uAbout = Objects.requireNonNull(snapshot.child("about").getValue()).toString();
+                        /*
                         String uName = snapshot.child("userName").getValue().toString();
                         String uMail = snapshot.child("userMail").getValue().toString();
                         String uPic = snapshot.child("profilePic").getValue().toString();
                         String uAbout = snapshot.child("about").getValue().toString();
+                        */
 
-                        Picasso.get().load(uPic).error(R.drawable.user)
-                                .placeholder(R.drawable.user).centerCrop().fit()
-                                .into(binding.profilePicImageview);
+                Picasso.get().load(uPic).error(R.drawable.user)
+                        .placeholder(R.drawable.user).centerCrop().fit()
+                        .into(binding.profilePicImageview);
 
-                        binding.username.setText(uName);
-                        binding.usermail.setText(uMail);
-                        binding.about.setText(uAbout);
-                    }
+                binding.username.setText(uName);
+                binding.usermail.setText(uMail);
+                binding.about.setText(uAbout);
+            }
 
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+        return binding.getRoot();
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) {
+            CropImage.ActivityResult result = CropImage.getActivityResult(data);
+            if (resultCode == RESULT_OK) {
+                assert result != null;
+                Uri resultUri = result.getUri();
+                //Uri resultUri = result.getUri();
+
+                Picasso.get().load(resultUri).fit().centerCrop().into(binding.profilePicImageview);
+
+                final StorageReference storageRef = firebaseStorage.getReference().child("Profile pictures").child(Objects.requireNonNull(firebaseAuth.getUid()));
+                //final StorageReference storageRef = firebaseStorage.getReference().child("Profile pictures").child(firebaseAuth.getUid());
+                storageRef.putFile(resultUri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                     @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
-
+                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                        storageRef.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                            @Override
+                            public void onSuccess(Uri uri) {
+                                firebaseDatabase.getReference("Users").child(firebaseAuth.getUid()).child("profilePic").setValue(uri.toString());
+                            }
+                        });
                     }
                 });
-
-
-                return binding.getRoot();
             }
-
-
-
-        @Override
-         public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-            super.onActivityResult(requestCode, resultCode, data);
-            if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) {
-                CropImage.ActivityResult result = CropImage.getActivityResult(data);
-                if (resultCode == RESULT_OK) {
-                    Uri resultUri = result.getUri();
-
-
-                    Picasso.get().load(resultUri).fit().centerCrop().into(binding.profilePicImageview);
-
-                    final StorageReference storageRef = firebaseStorage.getReference().child("Profile pictures").child(firebaseAuth.getUid());
-                    storageRef.putFile(resultUri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                        @Override
-                        public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-
-                            storageRef.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-                                @Override
-                                public void onSuccess(Uri uri) {
-                                    firebaseDatabase.getReference("Users").child(firebaseAuth.getUid()).child("profilePic").setValue(uri.toString());
-
-                                }
-                            });
-
-                        }
-                    });
-
-
-                }
-            }
-
         }
+    }
 }

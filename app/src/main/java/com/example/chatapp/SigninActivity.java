@@ -7,12 +7,10 @@ import android.text.method.PasswordTransformationMethod;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.widget.ContentLoadingProgressBar;
 
 import com.example.chatapp.databinding.ActivitySigninBinding;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -23,12 +21,10 @@ import com.google.firebase.database.FirebaseDatabase;
 
 public class SigninActivity extends AppCompatActivity {
 
-
     FirebaseAuth myAuth;
     ActivitySigninBinding activitySigninBinding;
     SharedPreferences sharedPreferences;
     FirebaseDatabase firebaseDatabase;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,43 +32,37 @@ public class SigninActivity extends AppCompatActivity {
 
         activitySigninBinding = ActivitySigninBinding.inflate(getLayoutInflater());
         requestWindowFeature(Window.FEATURE_NO_TITLE);
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         if (getSupportActionBar() != null) {
             getSupportActionBar().hide();
         }
         setContentView(activitySigninBinding.getRoot());
 
 //        sharedPreferences = getSharedPreferences("SavedToken",MODE_PRIVATE);
-
-
         myAuth = FirebaseAuth.getInstance();
         firebaseDatabase = FirebaseDatabase.getInstance();
 
         activitySigninBinding.progressBar.setVisibility(View.GONE);
 
-
         activitySigninBinding.hidePassBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-                if(activitySigninBinding.signinPassword.getTransformationMethod()!=null)
-                     activitySigninBinding.signinPassword.setTransformationMethod(null);
-                else activitySigninBinding.signinPassword.setTransformationMethod(new PasswordTransformationMethod());
-
+                if (activitySigninBinding.signinPassword.getTransformationMethod() != null)
+                    activitySigninBinding.signinPassword.setTransformationMethod(null);
+                else
+                    activitySigninBinding.signinPassword.setTransformationMethod(new PasswordTransformationMethod());
             }
         });
-
 
         activitySigninBinding.signinBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
                 String email = activitySigninBinding.signinMail.getText().toString().trim();
                 String password = activitySigninBinding.signinPassword.getText().toString().trim();
 
                 activitySigninBinding.progressBar.setVisibility(View.VISIBLE);
 
-                if(!email.isEmpty() && !password.isEmpty()) {
+                if (!email.isEmpty() && !password.isEmpty()) {
 
                     myAuth.signInWithEmailAndPassword(email, password)
                             .addOnCompleteListener(SigninActivity.this, new OnCompleteListener<AuthResult>() {
@@ -82,15 +72,11 @@ public class SigninActivity extends AppCompatActivity {
                                     activitySigninBinding.progressBar.setVisibility(View.GONE);
                                     if (task.isSuccessful()) {
 
-                                        String id =  task.getResult().getUser().getUid();
+                                        String id = task.getResult().getUser().getUid();
 
-
-                                            sharedPreferences = getSharedPreferences("SavedToken",MODE_PRIVATE);
-                                            String tokenInMain =  sharedPreferences.getString("ntoken","mynull");
-                                            firebaseDatabase.getReference("Users").child(id).child("token").setValue(tokenInMain);
-
-
-
+                                        sharedPreferences = getSharedPreferences("SavedToken", MODE_PRIVATE);
+                                        String tokenInMain = sharedPreferences.getString("ntoken", "mynull");
+                                        firebaseDatabase.getReference("Users").child(id).child("token").setValue(tokenInMain);
 
                                         Intent intent = new Intent(SigninActivity.this, MainActivity.class);
                                         startActivity(intent);
@@ -101,13 +87,11 @@ public class SigninActivity extends AppCompatActivity {
                                     }
                                 }
                             });
-                }else {
+                } else {
                     activitySigninBinding.progressBar.setVisibility(View.GONE);
                     Toast.makeText(SigninActivity.this, "Enter details", Toast.LENGTH_SHORT).show();
                 }
-
             }
         });
-
     }
 }

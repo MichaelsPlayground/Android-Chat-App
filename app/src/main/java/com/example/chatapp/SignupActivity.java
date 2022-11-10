@@ -33,6 +33,8 @@ import com.google.firebase.auth.GoogleAuthProvider;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.FirebaseDatabase;
 
+import java.util.Objects;
+
 import models.UserModel;
 
 public class SignupActivity extends AppCompatActivity {
@@ -43,7 +45,6 @@ public class SignupActivity extends AppCompatActivity {
     ActivityResultLauncher<Intent> activityResultLauncher;
     SharedPreferences sharedPreferences;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -51,8 +52,8 @@ public class SignupActivity extends AppCompatActivity {
         myAuth = FirebaseAuth.getInstance();
         firebaseDatabase = FirebaseDatabase.getInstance();
 
-        if(myAuth.getCurrentUser()!=null){
-            Intent intent = new Intent(SignupActivity.this,MainActivity.class);
+        if (myAuth.getCurrentUser() != null) {
+            Intent intent = new Intent(SignupActivity.this, MainActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
             startActivity(intent);
             finish();
@@ -61,7 +62,7 @@ public class SignupActivity extends AppCompatActivity {
         activitySignupBinding = ActivitySignupBinding.inflate(getLayoutInflater());
 
         requestWindowFeature(Window.FEATURE_NO_TITLE);
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         if (getSupportActionBar() != null) {
             getSupportActionBar().hide();
         }
@@ -76,17 +77,16 @@ public class SignupActivity extends AppCompatActivity {
 
         GoogleSignInClient mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
 
-
         activitySignupBinding.signupBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String email =  activitySignupBinding.mail.getText().toString().trim();
+                String email = activitySignupBinding.mail.getText().toString().trim();
                 String password = activitySignupBinding.password.getText().toString().trim();
                 String userName = activitySignupBinding.username.getText().toString().trim();
                 String about = "online";
 
-                if(!email.isEmpty() && !password.isEmpty() && !userName.isEmpty())
-                    signupUser(email,password, userName,about);
+                if (!email.isEmpty() && !password.isEmpty() && !userName.isEmpty())
+                    signupUser(email, password, userName, about);
                 else
                     Toast.makeText(SignupActivity.this, "Enter details", Toast.LENGTH_SHORT).show();
             }
@@ -96,9 +96,10 @@ public class SignupActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 
-                if(activitySignupBinding.password.getTransformationMethod()!=null)
+                if (activitySignupBinding.password.getTransformationMethod() != null)
                     activitySignupBinding.password.setTransformationMethod(null);
-                else activitySignupBinding.password.setTransformationMethod(new PasswordTransformationMethod());
+                else
+                    activitySignupBinding.password.setTransformationMethod(new PasswordTransformationMethod());
 
             }
         });
@@ -106,11 +107,10 @@ public class SignupActivity extends AppCompatActivity {
         activitySignupBinding.moveToSignin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(SignupActivity.this,SigninActivity.class);
+                Intent intent = new Intent(SignupActivity.this, SigninActivity.class);
                 startActivity(intent);
             }
         });
-
 
         //      Signin with google
 
@@ -121,39 +121,29 @@ public class SignupActivity extends AppCompatActivity {
 //                signInWithGoogle();
                 activitySignupBinding.progressBar.setVisibility(View.VISIBLE);
 
-                        Intent signInIntent  = mGoogleSignInClient.getSignInIntent();
-                        activityResultLauncher.launch(signInIntent);
-
-
-
+                Intent signInIntent = mGoogleSignInClient.getSignInIntent();
+                activityResultLauncher.launch(signInIntent);
             }
         });
-
 
         activityResultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), new ActivityResultCallback<ActivityResult>() {
             @Override
             public void onActivityResult(ActivityResult result) {
 
+                Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(result.getData());
+                try {
+                    // Google Sign In was successful, authenticate with Firebase
+                    GoogleSignInAccount account = task.getResult(ApiException.class);
+                    firebaseAuthWithGoogle(account.getIdToken());
 
-
-                    Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(result.getData());
-                    try {
-                        // Google Sign In was successful, authenticate with Firebase
-                        GoogleSignInAccount account = task.getResult(ApiException.class);
-                        firebaseAuthWithGoogle(account.getIdToken());
-
-                    } catch (ApiException e) {
-                        // Google Sign In failed, update UI appropriately
-                        Toast.makeText(SignupActivity.this, e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
-                    }
-
+                } catch (ApiException e) {
+                    // Google Sign In failed, update UI appropriately
+                    Toast.makeText(SignupActivity.this, e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
+                }
                 activitySignupBinding.progressBar.setVisibility(View.GONE);
             }
         });
-
     }
-
-
 
     public void firebaseAuthWithGoogle(String idToken) {
         AuthCredential credential = GoogleAuthProvider.getCredential(idToken, null);
@@ -162,52 +152,55 @@ public class SignupActivity extends AppCompatActivity {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
-
-                            String id =  task.getResult().getUser().getUid();
-
+                            String id = Objects.requireNonNull(task.getResult().getUser()).getUid();
+                            //String id = task.getResult().getUser().getUid();
 
                             // To not override default user values in DB when signing again with google
                             firebaseDatabase.getReference().child("Users").child(id).get().addOnSuccessListener(new OnSuccessListener<DataSnapshot>() {
                                 @Override
                                 public void onSuccess(DataSnapshot dataSnapshot) {
 
-                                    if(!dataSnapshot.hasChild("userName")){
+                                    if (!dataSnapshot.hasChild("userName")) {
 
                                         String defaultUserName = task.getResult().getUser().getEmail();
                                         String about = "Online";
 
-                                        sharedPreferences = getSharedPreferences("SavedToken",MODE_PRIVATE);
-                                        String tokenInMain =  sharedPreferences.getString("ntoken","mynull");
+                                        sharedPreferences = getSharedPreferences("SavedToken", MODE_PRIVATE);
+                                        String tokenInMain = sharedPreferences.getString("ntoken", "mynull");
 
+                                        assert defaultUserName != null;
+                                        UserModel userModel = new UserModel(defaultUserName.substring(0, defaultUserName.indexOf('@'))
+                                                , task.getResult().getUser().getEmail()
+                                                , "null"
+                                                , Objects.requireNonNull(task.getResult().getUser().getPhotoUrl()).toString()
+                                                , about);
+                                        /*
                                         UserModel userModel = new UserModel(defaultUserName.substring(0, defaultUserName.indexOf('@'))
                                                 , task.getResult().getUser().getEmail()
                                                 , "null"
                                                 , task.getResult().getUser().getPhotoUrl().toString()
                                                 , about);
+                                         */
 
                                         userModel.setToken(tokenInMain);
 
                                         firebaseDatabase.getReference().child("Users").child(id).setValue(userModel);
 
+                                    } else {
 
-                                    }else{
-
-                                        sharedPreferences = getSharedPreferences("SavedToken",MODE_PRIVATE);
-                                        String tokenInMain =  sharedPreferences.getString("ntoken","mynull");
+                                        sharedPreferences = getSharedPreferences("SavedToken", MODE_PRIVATE);
+                                        String tokenInMain = sharedPreferences.getString("ntoken", "mynull");
                                         firebaseDatabase.getReference("Users").child(id).child("token").setValue(tokenInMain);
 
                                     }
                                 }
                             });
-
                             activitySignupBinding.progressBar.setVisibility(View.GONE);
-                            Intent intent = new Intent(SignupActivity.this,MainActivity.class);
+                            Intent intent = new Intent(SignupActivity.this, MainActivity.class);
                             startActivity(intent);
-
 //                            }
-
                         } else {
-                            Toast.makeText(SignupActivity.this, task.getException().getLocalizedMessage()+"", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(SignupActivity.this, task.getException().getLocalizedMessage() + "", Toast.LENGTH_SHORT).show();
                             Log.d("TAG2", "signInWithCredential:failure", task.getException());
                             activitySignupBinding.progressBar.setVisibility(View.GONE);
                         }
@@ -215,12 +208,9 @@ public class SignupActivity extends AppCompatActivity {
                 });
     }
 
-
-
-    private void signupUser(String email, String password, String userName, String about){
+    private void signupUser(String email, String password, String userName, String about) {
 
         activitySignupBinding.progressBar.setVisibility(View.VISIBLE);
-
 
         myAuth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
@@ -228,40 +218,27 @@ public class SignupActivity extends AppCompatActivity {
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         activitySignupBinding.progressBar.setVisibility(View.GONE);
                         if (task.isSuccessful()) {
+                            String id2 = Objects.requireNonNull(task.getResult().getUser()).getUid();
+                            //String id2 = task.getResult().getUser().getUid();
 
-                           String id2 =  task.getResult().getUser().getUid();
+                            UserModel userModel = new UserModel(userName, email, password, "R.drawable.user", about);
 
+                            sharedPreferences = getSharedPreferences("SavedToken", MODE_PRIVATE);
+                            String tokenInMain = sharedPreferences.getString("ntoken", "mynull");
+                            userModel.setToken(tokenInMain);
 
+                            firebaseDatabase.getReference().child("Users")
+                                    .child(id2)
+                                    .setValue(userModel);
 
-                                        UserModel userModel = new UserModel(userName,email,password,"R.drawable.user",about);
-
-                                        sharedPreferences = getSharedPreferences("SavedToken",MODE_PRIVATE);
-                                        String tokenInMain =  sharedPreferences.getString("ntoken","mynull");
-                                        userModel.setToken(tokenInMain);
-
-                                        firebaseDatabase.getReference().child("Users")
-                                                .child(id2)
-                                                .setValue(userModel);
-
-
-                            Intent intent = new Intent(SignupActivity.this,MainActivity.class);
+                            Intent intent = new Intent(SignupActivity.this, MainActivity.class);
                             startActivity(intent);
 
-
-
-
-
-
-
                         } else {
-                            Toast.makeText(SignupActivity.this, "SignUp failed "+task.getException().getLocalizedMessage(),
+                            Toast.makeText(SignupActivity.this, "SignUp failed " + task.getException().getLocalizedMessage(),
                                     Toast.LENGTH_SHORT).show();
                         }
                     }
                 });
     }
-
-
-
-
 }
