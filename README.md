@@ -7,6 +7,10 @@ Android chat application developed with Java and Firebase. A hassle-free way to 
 * edit profile credentials
 * Notifications with firebase cloud messaging
 
+Original source: https://github.com/Raj-m01/Android-Chat-App
+
+Please note that you need to append your own google-services.json file to run the app.
+
 ## Screenshots : 
 
 <table>
