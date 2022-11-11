@@ -96,9 +96,9 @@ public class MessagingActivity extends AppCompatActivity {
                         msgData.clear();
 
                         for (DataSnapshot e : dataSnapshot.child("Contacts").child(receiverId).child("Chats").getChildren()) {
-                            String msg = e.child("msgText").getValue().toString();
+                            String msg = Objects.requireNonNull(e.child("msgText").getValue()).toString();
 
-                            // todo added a definition for decrypted
+                            // todo added a declaration for decrypted
                             String decrypted = "";
                             try {
                                 decrypted = AESUtils.decrypt(msg);

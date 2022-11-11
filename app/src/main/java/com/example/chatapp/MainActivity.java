@@ -1,5 +1,6 @@
 package com.example.chatapp;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
@@ -48,7 +49,8 @@ public class MainActivity extends AppCompatActivity {
         firebaseDatabase = FirebaseDatabase.getInstance();
         myAuth = FirebaseAuth.getInstance();
 
-        userId = myAuth.getCurrentUser().getUid();
+        userId = Objects.requireNonNull(myAuth.getCurrentUser()).getUid();
+        //userId = myAuth.getCurrentUser().getUid();
 
         if (getSupportActionBar() != null) {
             getSupportActionBar().hide();
@@ -89,6 +91,7 @@ public class MainActivity extends AppCompatActivity {
             public void run() {
                 firebaseDatabase.getReference("Users").addValueEventListener(new ValueEventListener() {
 
+                    @SuppressLint("NotifyDataSetChanged")
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
 
@@ -98,15 +101,18 @@ public class MainActivity extends AppCompatActivity {
                         ArrayList<String> recentMsg = new ArrayList<>();
 
                         if (snapshot.child(userId).hasChild("Contacts"))
-                            for (DataSnapshot e : snapshot.child(myAuth.getUid()).child("Contacts").getChildren()) {
+                            //for (DataSnapshot e : snapshot.child(myAuth.getUid()).child("Contacts").getChildren()) {
+                            for (DataSnapshot e : snapshot.child(Objects.requireNonNull(myAuth.getUid())).child("Contacts").getChildren()) {
                                 contactIds.add(e.getKey());
 
                                 if (e.hasChild("interactionTime")) {
+                                    // recentMsgTimes.add((long) e.child("interactionTime").getValue());
                                     recentMsgTimes.add((long) e.child("interactionTime").getValue());
                                 }
 
                                 if (e.hasChild("recentMessage")) {
-                                    recentMsg.add(e.child("recentMessage").getValue().toString());
+                                    // recentMsg.add(e.child("recentMessage").getValue().toString());
+                                    recentMsg.add(Objects.requireNonNull(e.child("recentMessage").getValue()).toString());
                                 }
                             }
 

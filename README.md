@@ -17,7 +17,8 @@ There are 3 Firebase services necessary to run the app:
 -Realtime Database
 -Storage
 
-
+The content of the chat is encrypted but with an **unsecure AES mode** (it uses the ECB mode) so you 
+should consider of using a more better one like CBC or GCM mode.
 ## Screenshots : 
 
 <table>
