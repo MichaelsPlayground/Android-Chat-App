@@ -17,7 +17,7 @@ folder structure. Open it and append one line:
 google-services.json
 ```
 
-This will pretend any upload of the file.
+This will prevend from any upload of the file.
 
 This is the flow to setup a Firebase service:
 
