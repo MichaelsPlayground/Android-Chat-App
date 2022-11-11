@@ -1,7 +1,25 @@
 # Firebase setup
 
 To run the app you need an individual google-services.json file, here are the steps to setup 
-the Firebase service:
+the Firebase service.
+
+But before we are starting the flow it is important that you **exclude the google-services.json-file 
+from uploading to a public GitHub repository**. This is important as the file contains an API-key 
+and when you are on a Firebase billing plan this data could get abused.
+
+In your Android Studio change the view to **Project** and find a file ".gitignore" in the top level 
+folder structure. Open it and append one line:
+
+```plaintext
+*.iml
+.gradle
+...
+google-services.json
+```
+
+This will pretend any upload of the file.
+
+This is the flow to setup a Firebase service:
 
 1) To run this app you need a connection between your app and Google's Firebase service, so go to:
 
@@ -66,7 +84,7 @@ publish your app on the PlayStore you need to give the SHA-1 value of the RELEAS
 
 Now press the "App registrieren" button to register the app.
 
-6) The Firebase wizzard is creating a configuration file that you need to copy to the project in Android Studio:
+6) The Firebase wizard is creating a configuration file that you need to copy to the project in Android Studio:
 
 Download the file by pressing on "google-services.json herunterladen"
 
