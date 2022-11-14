@@ -13,12 +13,73 @@ Please note that you need to append your own google-services.json file to run th
 
 There are 3 Firebase services necessary to run the app:
 
--Authentication
--Realtime Database
--Storage
+* Authentication
+* Realtime Database
+* Storage
+
+On Firebase console use this project: **FirebaseChatApp** (fir-chatapp-a5632)
 
 The content of the chat is encrypted but with an **unsecure AES mode** (it uses the ECB mode) so you 
 should consider of using a more better one like CBC or GCM mode.
+
+Work with Cloud Messaging: https://infyom.com/blog/send-device-to-device-push-notification-using-firebase-cloud-messaging
+
+Firebase Console - project settings - Cloud Messaging
+
+Server key for Cloud Messaging API (Legacy), add in FcmNotificationsSender.java:
+```plaintext
+AAAA1IYYfYY:APA91bGurFhX2EGXpjTdd2mRAjRaOO35WyeHXDHGNxJVm3j6ZkPh0pSGS_WqPwumpEMRM-q0MB_Osc7OiPi7qv5hfeEzZyNXNG3dyF_GPhnW3NDwchA77vAeTeA-Vh3yAba20AICdoSh
+```
+
+**Don't forget to give runtime permissions !**
+
+```plaintext
+AndroidManifest.xml:
+  
+
+    MainActivity onCreate:
+    askNotificationPermission();
+
+    private void askNotificationPermission() {
+        // This is only necessary for API Level > 33 (TIRAMISU)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) ==
+                    PackageManager.PERMISSION_GRANTED) {
+                // FCM SDK (and your app) can post notifications.
+            } else {
+                // Directly ask for the permission
+                requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS);
+            }
+        }
+    }
+    
+    private final ActivityResultLauncher<String> requestPermissionLauncher =
+            registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
+                if (isGranted) {
+                    Toast.makeText(this, "Notifications permission granted",Toast.LENGTH_SHORT)
+                            .show();
+                } else {
+                    Toast.makeText(this, "FCM can't post notifications without POST_NOTIFICATIONS permission",
+                            Toast.LENGTH_LONG).show();
+                }
+            });
+    
+
+
+```
+
+
+Solve FirebaseMessagingService.java:63:
+```plaintext
+java.lang.IllegalArgumentException: com.example.chatapp: Targeting S+ (version 31 and above) requires that one of FLAG_IMMUTABLE or FLAG_MUTABLE be specified when creating a PendingIntent.
+Strongly consider using FLAG_IMMUTABLE, only use FLAG_MUTABLE if some functionality depends on the PendingIntent being mutable, e.g. if it needs to be used with inline replies or bubbles.
+at android.app.PendingIntent.checkFlags(PendingIntent.java:382)
+at android.app.PendingIntent.getActivityAsUser(PendingIntent.java:465)
+at android.app.PendingIntent.getActivity(PendingIntent.java:451)
+at android.app.PendingIntent.getActivity(PendingIntent.java:415)
+at com.example.chatapp.FirebaseMessagingService.onMessageReceived(FirebaseMessagingService.java:63)
+```
+
 ## Screenshots : 
 
 <table>
