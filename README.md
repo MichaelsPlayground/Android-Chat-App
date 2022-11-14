@@ -22,7 +22,7 @@ On Firebase console use this project: **FirebaseChatApp** (fir-chatapp-a5632)
 The content of the chat is encrypted but with an **unsecure AES mode** (it uses the ECB mode) so you 
 should consider of using a more better one like CBC or GCM mode.
 
-Work with Cloud Messaging: https://infyom.com/blog/send-device-to-device-push-notification-using-firebase-cloud-messaging
+Works with Cloud Messaging: https://infyom.com/blog/send-device-to-device-push-notification-using-firebase-cloud-messaging
 
 Firebase Console - project settings - Cloud Messaging
 
