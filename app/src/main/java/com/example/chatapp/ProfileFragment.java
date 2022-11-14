@@ -82,7 +82,7 @@ public class ProfileFragment extends Fragment {
                             @Override
                             public void onSuccess(Void unused) {
 
-                                Toast.makeText(getContext(), "Username editted ", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(getContext(), "Username edited ", Toast.LENGTH_SHORT).show();
                                 binding.edittext.setText("");
                                 binding.editFragContainer.setVisibility(View.GONE);
                             }
