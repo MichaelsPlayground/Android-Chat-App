@@ -46,6 +46,8 @@ public class FcmNotificationsSender {
             notiObject.put("title", title);
             notiObject.put("body", body);
             notiObject.put("icon", "icon_for_splash");
+            notiObject.put("sound", "little_bell_14606.wav");
+            notiObject.put("android_channel_id","1");
             mainObj.put("notification", notiObject);
 
             JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, postUrl, mainObj, new Response.Listener<JSONObject>() {

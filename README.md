@@ -31,6 +31,27 @@ Server key for Cloud Messaging API (Legacy), add in FcmNotificationsSender.java:
 AAAA1IYYfYY:APA91bGurFhX2EGXpjTdd2mRAjRaOO35WyeHXDHGNxJVm3j6ZkPh0pSGS_WqPwumpEMRM-q0MB_Osc7OiPi7qv5hfeEzZyNXNG3dyF_GPhnW3NDwchA77vAeTeA-Vh3yAba20AICdoSh
 ```
 
+Sound files must reside in /res/raw/
+
+Sound effect: Sound Effect from <a href="https://pixabay.com/sound-effects/?utm_source=link-attribution&amp;utm_medium=referral&amp;utm_campaign=music&amp;utm_content=14606">Pixabay</a>
+
+Info about notification: https://developer.android.com/develop/ui/views/notifications/build-notification
+
+Info about notification channels: https://developer.android.com/develop/ui/views/notifications/channels
+
+AndroidManifest.xml:
+```plaintext
+        <service 
+             android:name=".PushNotificationService" 
+             android:exported="false">
+            <intent-filter>
+                <action 
+                      android:name="com.google.firebase.MESSAGING_EVENT">
+                 </action>
+            </intent-filter>
+        </service>
+```
+
 **Don't forget to give runtime permissions !**
 
 ```plaintext
